@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { SchemaTypes, Types } from 'mongoose';
+import { SchemaTypes } from 'mongoose';
 import { Pet } from '../pet/pet.schema';
 import { Address } from '../address/address.schema';
 export type UserDocument = User & Document;
@@ -12,11 +12,6 @@ export type UserDocument = User & Document;
   },
 })
 export class User {
-  @Prop({
-    default: () => new Types.ObjectId(),
-    type: Types.ObjectId,
-  })
-  _id: Types.ObjectId;
   @Prop({ default: '' })
   firstName: string;
   @Prop({ default: '' })

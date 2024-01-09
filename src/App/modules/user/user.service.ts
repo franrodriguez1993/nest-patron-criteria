@@ -7,7 +7,7 @@ import { Request } from 'express';
 import { Auth0Service } from 'src/App/shared/auth0.service';
 import { User, UserDocument } from './user.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, PopulateOptions, Types } from 'mongoose';
+import { Model, PopulateOptions } from 'mongoose';
 import { userCriteria } from './user.criteria';
 
 @Injectable()
@@ -58,9 +58,7 @@ export class UserService {
     if (Object.keys(criteria).length === 0)
       throw new InternalServerErrorException('Invalid criteria');
     return await this.userModel
-      .findOne(
-        criteria._id ? { _id: new Types.ObjectId(criteria._id) } : criteria,
-      )
+      .findOne(criteria)
       .populate(populate)
       .lean()
       .exec();

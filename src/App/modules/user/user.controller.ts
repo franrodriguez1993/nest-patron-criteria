@@ -27,14 +27,15 @@ export class UserController {
   }
 
   @Get('/hardcoded')
-  findOneHardcoded() {
-    return this.userService.findUserByCriteria(
+  async findOneHardcoded() {
+    const user = await this.userService.findUserByCriteria(
       {
         _id: '659324696178c67191ebbeda',
         // address: '6596b01ddbd6b8e227a6d575',
       },
       ['pets', 'address'],
     );
+    return user;
   }
   @Get('/:id')
   findOneById(@Param('id') id: string) {

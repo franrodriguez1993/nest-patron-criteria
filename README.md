@@ -11,12 +11,6 @@ Supongamos que tenemos un schema en mongo con las siguientes propiedades:
 ```js
 
 export class User {
-  @Prop({
-    default: () => new Types.ObjectId(),
-    type: Types.ObjectId,
-  })
-  _id: Types.ObjectId;
-
   @Prop({ default: '' })
   firstName: string;
 
@@ -91,7 +85,7 @@ async findUserByCriteria(criteria: userCriteria) {
     throw new InternalServerErrorException('Invalid criteria');
 
   return await this.userModel
-    .findOne(criteria._id ? { _id: new Types.ObjectId(criteria._id) } : criteria)
+    .findOne(criteria)
     .lean()
     .exec();
 }
@@ -99,16 +93,6 @@ async findUserByCriteria(criteria: userCriteria) {
 ```
 
 Para que este método funcione es importante recibir un objeto con al menos UNA propiedad que sirva para buscar el registro en la base de datos, en este caso, lanzamos una excepción si se pasa un objeto vacío por parámetro.
-
-Otra cosa a tener en cuenta es la siguiente línea de código:
-
-```js
-
- .findOne(criteria._id ? { _id: new Types.ObjectId(criteria._id) } : criteria)
-
-```
-
-En este caso, chequeamos si el criterio de búsqueda es un \_id, mongo no guarda los id como string, sino como "ObjectId", esto puede generar problemas y no encontrar el registro, por lo cual vamos a convertir nuestro string id en un ObjectId de mongo para que pueda realizar correctamente la búsqueda.
 
 Veamos algunos ejemplos de implementación:
 
@@ -178,7 +162,7 @@ Existen 2 formas diferentes de encarar el populate en este método:
       throw new InternalServerErrorException('Invalid criteria');
 
     return await this.userModel
-      .findOne(criteria._id ? { _id: new Types.ObjectId(criteria._id) } : criteria)
+      .findOne(criteria)
       .populate(populate ? ['pets', 'address'] : '')
       .lean()
       .exec();
@@ -221,7 +205,7 @@ Esta forma de hacer populate en el criteria es simple y práctica, pero tiene su
       throw new InternalServerErrorException('Invalid criteria');
 
     return await this.userModel
-      .findOne(criteria._id ? { _id: new Types.ObjectId(criteria._id) } : criteria)
+      .findOne(criteria)
       .populate(populate)
       .lean()
       .exec();
@@ -261,19 +245,6 @@ A través de esta implementación podemos popular de forma dinámica según sea 
 - El patrón criteria nos permite ahorrarnos mucho código a hora de buscar registros en la base de datos, ya que centramos todas las búsquedas por diferentes parámetros dentro de un mismo método dinámico.
 
 - Tenemos que valorar en que casos es verdaderamente beneficiosos aplicarlo, ya que en schemas con pocas propiedades o en los cuales no vamos a realizar búsquedas mas que por id, no tiene sentido implementarlo.
-
-- Es necesario mapear la propiedad \_id dentro del schema para poder acceder a ella dentro del código cuando búsquemos un determinado registro para manipularlo internamente en un servicio, ya que al aplicar el .lean() convierte el documento en un objeto y typescript no reconoce una propiedad que no esté tipada.
-  Se puede tipar de forma muy sencilla dentro del schema con:
-
-```js
-
-  @Prop({
-    default: () => new Types.ObjectId(),
-    type: Types.ObjectId,
-  })
-  _id: Types.ObjectId;
-
-```
 
 - Este método es muy versatil y no solo sirve para traer un registro, sino que también se puede implementar para traer un array de registros que coincidan con determinados parámetros de búsqueda.
 
